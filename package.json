@@ -1,7 +1,7 @@
 {
   "name": "hongkong-kmb-api",
   "version": "1.0.0",
-  "description": "Node.js module to realtime bus info from KMB Hong Kong",
+  "description": "Node.js module to realtime bus ETA and bus route info from KMB Hong Kong.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

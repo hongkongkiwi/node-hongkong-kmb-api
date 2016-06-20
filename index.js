@@ -219,6 +219,7 @@ transport.downloadPOIXml().then(function(result) {
   var tables = {
     'kmb_RS_stopinfo': {},
     'kmb_areafile': {},
+    'kmb_routemaster': {},
     'kmb_specialnote': {}
   };
 
@@ -285,6 +286,44 @@ transport.downloadPOIXml().then(function(result) {
     }
   }
 
+  function process_kmb_routemaster(table,types,parsed) {
+    //console.log(types,JSON.stringify(parsed,null,2));
+    if (types.indexOf('INSERT') > -1) {
+      // [ { text: '91R', type: 3 }, // Bus Route
+      //   { text: '0.00', type: 3 }, // Always zero
+      //   { text: '10.50', type: 3 }, // Route Cost
+      //   { text: '11.00', type: 3 }, // Route Length
+      //   { text: '50', type: 3 }, / Total Route Time
+      //   { text: 'R', type: 3 }, // Route type A,N,R,C // Bus Type (a=daytime,n=night,r=recreational,c=racecourse)
+      //   { text: '91R', type: 3 } ] // Always same as bus route
+
+      // https://en.wikipedia.org/wiki/Hong_Kong_bus_route_numbering#Alphabet_suffix
+
+      var route = parsed.values[0][0].text;
+      var prefix = isNaN(parseInt(route.substring(0,1))) ? route.substring(0,1) : null;
+      var suffix = isNaN(parseInt(route.slice(-1))) ? route.slice(-1) : null;
+      table[route] = {
+        route_no: route,
+        cost: parsed.values[0][2].text,
+        length_km: parsed.values[0][3].text,
+        time_mins: parsed.values[0][4].text,
+        type: parsed.values[0][5].text,
+        prefix: prefix,
+        suffx: suffix
+      };
+    } else if (types.indexOf('DELETE') > -1) {
+      var column_name = parsed.where[0].column.text;
+      if (column_name === 'route_no') {
+         var column_value = parsed.where[0].values[0][0].text;
+         delete table[column_value];
+      } else {
+         console.log(JSON.stringify(parsed,null,2));
+      }
+    } else {
+      console.log(JSON.stringify(parsed,null,2));
+    }
+  }
+
   for (var key in records) {
     var value = records[key].trim();
     var types = identify(value);
@@ -297,20 +336,21 @@ transport.downloadPOIXml().then(function(result) {
     } else if (tableName === 'kmb_routestopfile') {
 
     } else if (tableName === 'kmb_routemaster') {
-
+      process_kmb_routemaster(tables.kmb_routemaster,types,parsed);
+      //return;
     } else if (tableName === 'kmb_routefreqfile') {
-
+      //console.log(types,JSON.stringify(value,null,2));
     } else if (tableName === 'kmb_routeboundmaster') {
-      
+      //console.log(types,JSON.stringify(value,null,2));
     } else if (tableName === 'kmb_businfo') {
-
+      //console.log(types,JSON.stringify(value,null,2));
     } else if (tableName === 'kmb_areasearchfile') {
 
     } else if (tableName === 'kmb_specialnote') {
       process_kmb_specialnote(tables.kmb_specialnote,types,parsed);
     }
   }
-  //console.log(tables);
+  //console.log(tables.kmb_routemaster[1]);
 
   //console.log(JSON.stringify(result.plist.array[0],null,2));
 }, function(reason) {
