@@ -484,10 +484,18 @@ transport.downloadPOIXml().then(function(result) {
   }
 
   for (var key in records) {
-    var value = records[key].trim();
+    var value = records[key].trim().replace(/(''S)/g,'S').replace(/(S'')/g,'S').replace(/(O'')/g,'O').replace(/(V''T)/g,'VT'); //'
+    // if (value.indexOf("''") > 1) {
+    //   console.log(value);
+    //   return;
+    // }
     var types = identify(value);
     var parsed = parse(value);
     var tableName = parsed.source.name;
+
+    if (types[0] !== 'INSERT' && types[0] !== 'DELETE')
+      console.log(types);
+
     if (tableName === 'kmb_RS_stopinfo') {
       process_kmb_rs_stop_info(tables.kmb_RS_stopinfo,types,parsed);
     } else if (tableName === 'kmb_areafile') {
@@ -509,7 +517,7 @@ transport.downloadPOIXml().then(function(result) {
     }
   }
   //console.log(tables.kmb_routemaster[1]);
-  console.log(count);
+  console.log(tables.kmb_routestopfile);
 
   //console.log(JSON.stringify(result.plist.array[0],null,2));
 }, function(reason) {
