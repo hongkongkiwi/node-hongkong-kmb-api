@@ -1,0 +1,38 @@
+{
+  "name": "hongkong-kmb-api",
+  "version": "1.0.0",
+  "description": "Node.js module to realtime bus info from KMB Hong Kong",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hongkongkiwi/node-hongkong-kmb-api.git"
+  },
+  "keywords": [
+    "hongkong",
+    "bus",
+    "train",
+    "plane",
+    "transport",
+    "realtime"
+  ],
+  "author": "Andy Savage <andy@savage.hk>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hongkongkiwi/node-hongkong-kmb-api/issues"
+  },
+  "homepage": "https://github.com/hongkongkiwi/node-hongkong-kmb-api#readme",
+  "dependencies": {
+    "bluebird": "^3.4.1",
+    "debug": "^2.2.0",
+    "memory-cache": "^0.1.6",
+    "moment": "^2.13.0",
+    "node-constants": "0.0.2",
+    "node-localcache": "^0.1.3",
+    "request-promise": "^3.0.0",
+    "sql-query-identifier": "^1.0.0",
+    "underscore": "^1.8.3"
+  }
+}
