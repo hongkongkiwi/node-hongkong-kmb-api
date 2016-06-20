@@ -220,7 +220,8 @@ transport.downloadPOIXml().then(function(result) {
     'kmb_RS_stopinfo': {},
     'kmb_areafile': {},
     'kmb_routemaster': {},
-    'kmb_specialnote': {}
+    'kmb_specialnote': {},
+    'kmb_routestopfile': []
   };
 
   function process_kmb_rs_stop_info(table, types, parsed) {
@@ -252,14 +253,7 @@ transport.downloadPOIXml().then(function(result) {
   }
 
   function process_kmb_areafile(table,types,parsed) {
-    if (types.indexOf('INSERT') > -1) {
-      console.log(types);
-      console.log(types,  parsed, parsed.values);
-    } else if (types.indexOf('DELETE') > -1) {
-      //console.log(types,parsed.where[0].column, parsed.where[0].values);
-    } else {
-      console.log(parsed);
-    }
+    /** Havn't figured out what this table is for **/
   }
 
   function process_kmb_specialnote(table,types,parsed) {
@@ -298,6 +292,28 @@ transport.downloadPOIXml().then(function(result) {
       //   { text: '91R', type: 3 } ] // Always same as bus route
 
       // https://en.wikipedia.org/wiki/Hong_Kong_bus_route_numbering#Alphabet_suffix
+      // Alphabet prefix[edit]
+      // Prefix A: Airport deluxe bus routes[1][2] (except MTR Feeder Bus route A73, which was an auxiliary route, now canceled)
+      // Prefix B: Border routes
+      // Prefix E: North Lantau external bus routes[3][2]
+      // Prefix H: New World First Bus Rickshaw Sightseeing Bus routes
+      // Prefix K: MTR Feeder Bus (formerly KCR Feeder Bus) routes
+      // Prefix M: Some bus routes that are terminated at an Airport Express station
+      // Prefix N: Overnight bus routes
+      // Prefix NA: Overnight Airport deluxe bus routes
+      // Prefix P: North Lantau peak-hour only routes: P12, P21 and P22 (all canceled)
+      // Prefix R: North Lantau recreational bus routes (for Hong Kong Disneyland)
+      // Prefix S: Airport shuttle bus routes[4][2]
+      // Prefix T: Recreational bus routes (T stands for tourists)
+      // Prefix X: Express routes for special services
+      // Alphabet suffix[edit]
+      // Suffix A, B, C, D, E, F: Conventional routes
+      // Suffix K: Mainly connecting to East Rail Line (formerly KCR East Rail) stations of MTR
+      // Suffix M: Mainly connecting to the stations of Kwun Tong Line, Island Line, Tsuen Wan Line and Tseung Kwan O Line of MTR
+      // Suffix P: Peak-hour only routes (except KMB 8P, 276P, NWFB 8P, 18P, Citybus A29P, Long Win Bus A41P and New Lantau Bus B2P, which are for whole day service)
+      // Suffix R: Recreational bus routes
+      // Suffix S: Peak-hour only routes or special services
+      // Suffix X: Express services
 
       var route = parsed.values[0][0].text;
       var prefix = isNaN(parseInt(route.substring(0,1))) ? route.substring(0,1) : null;
@@ -324,6 +340,149 @@ transport.downloadPOIXml().then(function(result) {
     }
   }
 
+  count = 0;
+  function kmb_routestopfile(table,types,parsed,value) {
+    if (types.indexOf('INSERT') > -1) {
+      //console.log(types);
+      //console.log(types, parsed, parsed.values);
+
+      /**
+      { text: '978A', type: 3 }, // Bus Route
+      { text: '1', type: 3 },
+      { text: '0', type: 3 },
+      { text: '09A', type: 3 },
+      { text: '0.00', type: 3 },
+      { text: '24.30', type: 3 },
+      { text: 'LUEN WO HUI B/T', type: 3 }, // English Stop Name
+      { text: '', type: 3 },
+      { text: '', type: 3 },
+      { text: '', type: 3 },
+      { text: '聯和墟總站', type: 3 }, // Traditional Chinese Stop Name
+      { text: '', type: 3 },
+      { text: '', type: 3 },
+      { text: '联和墟总站', type: 3 }, // Simplified Chinese Stop Name
+      { text: '', type: 3 },
+      { text: '', type: 3 },
+      { text: 'LU02-T-1300-0', type: 3 }, // Bus Stop Id
+      { text: 'LUEN WO HUI BUS TERMINUS', type: 3 }, // English Stop Name
+      { text: '聯和墟總站', type: 3 }, // Traditional Chinese Stop Name
+      { text: '联和墟总站', type: 3 }, // Simplified Chinese Stop Name
+      { text: '09', type: 3 }
+
+      0. { text: 'B1', type: 3 }, // Route Number
+      1. { text: '2', type: 3 }, // Route Direction
+      2. { text: '1', type: 3 }, // Stop Number
+      3. { text: '14E', type: 3 }, // Area Code
+      4. { text: '0.00', type: 3 }, // Always Zero (?)
+      5. { text: '13.20', type: 3 }, // Fare Price
+      6. { text: 'LOK MA CHAU ROAD', type: 3 }, // English Road Name
+      7. { text: 'HA WAN TSUEN', type: 3 }, // English Area Name
+      8. { text: 'L/P BD0975', type: 3 }, Lamp Post English
+      9. { text: '', type: 3 }, // Closest Landmark
+      10. { text: '落馬洲路', type: 3 }, // TC Road Name
+      11. { text: '下灣村', type: 3 }, // TC Area Name
+      12. { text: '燈柱BD0975', type: 3 }, // TC Lamp Post
+      13. { text: '落马洲路', type: 3 }, // SC Road Name
+      14. { text: '下湾村', type: 3 }, // SC Area Name
+      15. { text: '灯柱BD0975', type: 3 },  // SC Lamp Post
+      16. { text: 'LO08-S-0950-0', type: 3 }, // Bus Stop ID
+      17. { text: 'HA WAN TSUEN', type: 3 }, // English Bus Stop Name
+      18. { text: '下灣村', type: 3 }, // TC Bus Stop Name
+      19. { text: '下湾村', type: 3 }, // SC Bus Stop Name
+      20. { text: '14', type: 3 } // District Code*/
+
+      if (parsed.values[0].length === 23) {
+        table.push({
+          route_no: parsed.values[0][0].text,
+          bound: parsed.values[0][1].text,
+          stop_seq: parsed.values[0][2].text,
+          area: parsed.values[0][3].text,
+          price: parsed.values[0][5].text,
+          en_road: parsed.values[0][6].text,
+          en_district: parsed.values[0][7].text,
+          en_lampost: parsed.values[0][8].text,
+          en_landmark: parsed.values[0][9].text,
+          tc_road: parsed.values[0][10].text,
+          tc_district: parsed.values[0][11].text,
+          tc_lampost: parsed.values[0][12].text,
+          tc_landmark: parsed.values[0][13].text,
+          sc_road: parsed.values[0][14].text,
+          sc_district: parsed.values[0][15].text,
+          sc_lampost: parsed.values[0][16].text,
+          sc_landmark: parsed.values[0][17].text,
+          stop_id: parsed.values[0][18].text,
+          en_stop_name: parsed.values[0][19].text,
+          tc_stop_name: parsed.values[0][20].text,
+          sc_stop_name: parsed.values[0][21].text,
+          district: parsed.values[0][22].text,
+        });
+        //console.log(parsed.source.column);
+      } else if (parsed.values[0].length === 22) {
+        console.log(value);
+      }
+      // if (parsed.source.column.length > 0) {
+      //   console.log(parsed.source.column, parsed.values);
+      // }
+    //
+    // } else if (parsed.values[0].length === 22) {
+    //   console.log(parsed.values);
+
+      //console.log('insert',parsed.values[0][0].text + '_' + parsed.values[0][1].text + '_' + parsed.values[0][2].text);
+
+      /*{ text: '66X', type: 3 },
+      { text: '1', type: 3 },
+      { text: '19', type: 3 },
+      { text: '01H', type: 3 },
+      { text: '0.00', type: 3 },
+      { text: '5.10', type: 3 },
+      { text: 'CHERRY ST', type: 3 },
+      { text: 'OUTSIDE CENTRAL PARK', type: 3 },
+      { text: '', type: 3 },
+      { text: '', type: 3 },
+      { text: '櫻桃街帝柏海灣對出', type: 3 },
+      { text: '', type: 3 },
+      { text: '', type: 3 },
+      { text: '樱桃街帝柏海湾对出', type: 3 },
+      { text: '', type: 3 },
+      { text: '', type: 3 },
+      { text: 'CH09-W-1250-0', type: 3 },
+      { text: 'CENTRAL PARK', type: 3 },
+      { text: '帝柏海灣', type: 3 },
+      { text: '帝柏海湾', type: 3 },
+      { text: '01', type: 3 }
+      **/
+      //if (!parsed.source.column && parsed.values[0][4].text !== '0.00') {
+        //console.log(parsed.source.column,parsed.values,parsed);
+      //}
+      // if (parsed.values[0] && parsed.values[0][8].text !== '')
+      //   console.log(parsed.values[0],parsed.values[0][8].text);
+
+      // if ((parsed.values[0].length === 23 || parsed.values[0].length === 22) && parsed.source.column.length === 0) {
+      //   //console.log(parsed.values[0][8].text + parsed.values[0][9].text,parsed.values[0].length);
+      //   //console.log(parsed.values[0].length, parsed.values[0]);
+      //
+      //   count++;
+      // }
+    } else if (types.indexOf('DELETE') > -1) {
+      var column_name = parsed.where[0].column.text;
+      if (parsed.where.length === 3 && (parsed.where[0].column.text === 'route_no' && parsed.where[1].column.text === 'bound' && parsed.where[2].column.text === 'stop_seq')) {
+        var route_no = parsed.where[0].values[0][0].text;
+        var bound = parsed.where[1].values[0][0].text;
+        var stop_seq = parsed.where[2].values[0][0].text;
+        //var item = table[route_no]
+        console.log('**** delete',route_no,bound,stop_seq);
+      }
+      if (column_name === 'route') {
+         var column_value = parsed.where[0].values[0][0].text;
+         delete table[column_value];
+      } else {
+         //console.log(JSON.stringify(parsed,null,2));
+      }
+    } else {
+      console.log(parsed);
+    }
+  }
+
   for (var key in records) {
     var value = records[key].trim();
     var types = identify(value);
@@ -332,12 +491,11 @@ transport.downloadPOIXml().then(function(result) {
     if (tableName === 'kmb_RS_stopinfo') {
       process_kmb_rs_stop_info(tables.kmb_RS_stopinfo,types,parsed);
     } else if (tableName === 'kmb_areafile') {
-      //process_kmb_areafile(tables.kmb_areafile,types,parsed);
+      process_kmb_areafile(tables.kmb_areafile,types,parsed);
     } else if (tableName === 'kmb_routestopfile') {
-
+      kmb_routestopfile(tables.kmb_routestopfile,types,parsed,value);
     } else if (tableName === 'kmb_routemaster') {
       process_kmb_routemaster(tables.kmb_routemaster,types,parsed);
-      //return;
     } else if (tableName === 'kmb_routefreqfile') {
       //console.log(types,JSON.stringify(value,null,2));
     } else if (tableName === 'kmb_routeboundmaster') {
@@ -345,12 +503,13 @@ transport.downloadPOIXml().then(function(result) {
     } else if (tableName === 'kmb_businfo') {
       //console.log(types,JSON.stringify(value,null,2));
     } else if (tableName === 'kmb_areasearchfile') {
-
+      //console.log(types,JSON.stringify(value,null,2));
     } else if (tableName === 'kmb_specialnote') {
       process_kmb_specialnote(tables.kmb_specialnote,types,parsed);
     }
   }
   //console.log(tables.kmb_routemaster[1]);
+  console.log(count);
 
   //console.log(JSON.stringify(result.plist.array[0],null,2));
 }, function(reason) {
@@ -358,3 +517,8 @@ transport.downloadPOIXml().then(function(result) {
 }).catch(function(err) {
   console.error('Error', err);
 });
+
+// Get Bus Stop Map
+// Map View - http://www.kmb.hk/chi/map.php?file=LO08-S-0950-0
+// Street View - http://www.kmb.hk/chi/streetview.php?file=LO08-S-0950-0
+//                http://www.kmb.hk/chi/img.php?file=CA04-S-1025-0
